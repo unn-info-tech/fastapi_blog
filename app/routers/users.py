@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from typing import List, Optional
 from .. import models, schemas
 from ..database import get_db
 from ..utils.hashing import hash_password
@@ -17,25 +17,27 @@ router = APIRouter(
     response_model=schemas.UserResponse
 )
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    try:
-        hashed = hash_password(user.password)
-        print("HASHED:", hashed)
+    # Email allaqachon borligini tekshirish
+    existing = db.query(models.User).filter(
+        models.User.email == user.email
+    ).first()
 
-        new_user = models.User(
-            username=user.username,
-            email=user.email,
-            password=hashed
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bu email allaqachon ro'yxatdan o'tgan"
         )
 
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+    # Parolni xashlash
+    hashed = hash_password(user.password)
+    user.password = hashed
 
-        return new_user
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
-    except Exception as e:
-        print("REAL ERROR:", e)
-        raise HTTPException(status_code=500, detail=str(e))
+    return new_user
 
 # ─── GET USER ─────────────────────────────────
 @router.get(
@@ -53,28 +55,20 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
     return user
 
-# ─── TEST FOR DUPLICATE EMAIL ─────────────────
-def test_duplicate_email():
-    """
-    Test for duplicate email handling.
-    Steps:
-    1. Create a user with a specific email
-    2. Try to create another user with the same email
-    3. Verify that a 400 error is raised
 
-    Note: This is a conceptual test. In practice, use FastAPI TestClient:
-    from fastapi.testclient import TestClient
-    from app.main import app
+# ─── READ ALL (qidiruv + pagination) ─────────
+@router.get(
+    "/",
+    response_model=List[schemas.PostResponse]
+)
+def get_all_posts(
+    db: Session = Depends(get_db),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = ""
+):
+    posts = db.query(models.Post).filter(
+        models.Post.title.contains(search)
+    ).limit(limit).offset(skip).all()
 
-    client = TestClient(app)
-
-    # Create first user
-    response = client.post("/users/", json={"username": "test", "email": "test@example.com", "password": "pass"})
-    assert response.status_code == 201
-
-    # Try duplicate
-    response = client.post("/users/", json={"username": "test2", "email": "test@example.com", "password": "pass"})
-    assert response.status_code == 400
-    assert "email allaqachon ro'yxatdan o'tgan" in response.json()["detail"]
-    """
-    pass
+    return posts

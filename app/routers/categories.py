@@ -1,91 +1,91 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
+# from fastapi import APIRouter, Depends, HTTPException, status
+# from sqlalchemy.orm import Session
+# from typing import List
 
-from .. import models, schemas
-from ..database import get_db
+# from .. import models, schemas
+# from ..database import get_db
 
-router = APIRouter(
-    prefix="/categories",
-    tags=["Categories"]
-)
+# router = APIRouter(
+#     prefix="/categories",
+#     tags=["Categories"]
+# )
 
-# ─── CREATE ───────────────────────────────────
-@router.post(
-    "/",
-    status_code=status.HTTP_201_CREATED,
-    response_model=schemas.CategoryResponse
-)
-def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_db)):
-    new_category = models.Category(**category.dict())
-    db.add(new_category)
-    db.commit()
-    db.refresh(new_category)
-    return new_category
+# # ─── CREATE ───────────────────────────────────
+# @router.post(
+#     "/",
+#     status_code=status.HTTP_201_CREATED,
+#     response_model=schemas.CategoryResponse
+# )
+# def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_db)):
+#     new_category = models.Category(**category.dict())
+#     db.add(new_category)
+#     db.commit()
+#     db.refresh(new_category)
+#     return new_category
 
-# ─── READ ALL ─────────────────────────────────
-@router.get(
-    "/",
-    response_model=List[schemas.CategoryResponse]
-)
-def get_all_categories(db: Session = Depends(get_db)):
-    categories = db.query(models.Category).all()
-    return categories
+# # ─── READ ALL ─────────────────────────────────
+# @router.get(
+#     "/",
+#     response_model=List[schemas.CategoryResponse]
+# )
+# def get_all_categories(db: Session = Depends(get_db)):
+#     categories = db.query(models.Category).all()
+#     return categories
 
-# ─── READ ONE ─────────────────────────────────
-@router.get(
-    "/{category_id}",
-    response_model=schemas.CategoryResponse
-)
-def get_category(category_id: int, db: Session = Depends(get_db)):
-    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+# # ─── READ ONE ─────────────────────────────────
+# @router.get(
+#     "/{category_id}",
+#     response_model=schemas.CategoryResponse
+# )
+# def get_category(category_id: int, db: Session = Depends(get_db)):
+#     category = db.query(models.Category).filter(models.Category.id == category_id).first()
 
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ID={category_id} bo'lgan category topilmadi"
-        )
+#     if not category:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"ID={category_id} bo'lgan category topilmadi"
+#         )
 
-    return category
+#     return category
 
-# ─── UPDATE ───────────────────────────────────
-@router.put(
-    "/{category_id}",
-    response_model=schemas.CategoryResponse
-)
-def update_category(
-    category_id: int,
-    updated_category: schemas.CategoryUpdate,
-    db: Session = Depends(get_db)
-):
-    category_query = db.query(models.Category).filter(models.Category.id == category_id)
-    category = category_query.first()
+# # ─── UPDATE ───────────────────────────────────
+# @router.put(
+#     "/{category_id}",
+#     response_model=schemas.CategoryResponse
+# )
+# def update_category(
+#     category_id: int,
+#     updated_category: schemas.CategoryUpdate,
+#     db: Session = Depends(get_db)
+# ):
+#     category_query = db.query(models.Category).filter(models.Category.id == category_id)
+#     category = category_query.first()
 
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ID={category_id} bo'lgan category topilmadi"
-        )
+#     if not category:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"ID={category_id} bo'lgan category topilmadi"
+#         )
 
-    category_query.update(updated_category.dict(), synchronize_session=False)
-    db.commit()
+#     category_query.update(updated_category.dict(), synchronize_session=False)
+#     db.commit()
 
-    return category_query.first()
+#     return category_query.first()
 
-# ─── DELETE ───────────────────────────────────
-@router.delete(
-    "/{category_id}",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-def delete_category(category_id: int, db: Session = Depends(get_db)):
-    category_query = db.query(models.Category).filter(models.Category.id == category_id)
-    category = category_query.first()
+# # ─── DELETE ───────────────────────────────────
+# @router.delete(
+#     "/{category_id}",
+#     status_code=status.HTTP_204_NO_CONTENT
+# )
+# def delete_category(category_id: int, db: Session = Depends(get_db)):
+#     category_query = db.query(models.Category).filter(models.Category.id == category_id)
+#     category = category_query.first()
 
-    if not category:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ID={category_id} bo'lgan category topilmadi"
-        )
+#     if not category:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"ID={category_id} bo'lgan category topilmadi"
+#         )
 
-    category_query.delete(synchronize_session=False)
-    db.commit()
+#     category_query.delete(synchronize_session=False)
+#     db.commit()

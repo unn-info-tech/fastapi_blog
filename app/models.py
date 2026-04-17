@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
-
 class Post(Base):
     __tablename__ = "posts"
 
@@ -17,21 +16,9 @@ class Post(Base):
         server_default=func.now()
     )
 
-    # Foreign key to User
-    owner_id = Column(
-        Integer,
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True
-    )
+    # Foreign key (keyinroq User qo'shganda)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     owner = relationship("User", back_populates="posts")
-
-    # Foreign key to Category
-    category_id = Column(
-        Integer,
-        ForeignKey("categories.id", ondelete="SET NULL"),
-        nullable=True
-    )
-    category = relationship("Category", back_populates="posts")
 
 
 class User(Base):
@@ -48,17 +35,3 @@ class User(Base):
     )
 
     posts = relationship("Post", back_populates="owner")
-
-
-class Category(Base):
-    __tablename__ = "categories"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    created_at = Column(
-        TIMESTAMP(timezone=True),
-        server_default=func.now()
-    )
-
-    posts = relationship("Post", back_populates="category")
