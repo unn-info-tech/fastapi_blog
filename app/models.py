@@ -19,6 +19,9 @@ class Post(Base):
     # Foreign key (keyinroq User qo'shganda)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     owner = relationship("User", back_populates="posts")
+    
+    # ← YANGI USTUN:
+    rating = Column(Integer, nullable=True)
 
 
 class User(Base):
@@ -28,6 +31,7 @@ class User(Base):
     username = Column(String(100), nullable=False)
     email = Column(String(255), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
+    phone = Column(String(20), nullable=True)   # ← YANGI
     created_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,

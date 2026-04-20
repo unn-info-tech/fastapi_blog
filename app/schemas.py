@@ -8,6 +8,7 @@ class PostBase(BaseModel):
     title: str              # post title
     content: str            # post content
     published: bool = True  # default = True
+    rating: Optional[int] = None 
 
 class PostCreate(PostBase):
     pass  # used when creating a post (same fields as base)
