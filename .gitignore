@@ -1,75 +1,23 @@
-# Python
-
-**pycache**/
+# Python cache
+__pycache__/
 *.py[cod]
-*.pyo
-*.pyd
 
 # Virtual environment
-
 venv/
-.env/
-.venv/
-
-# Environment variables (IMPORTANT)
-
 .env
 
-# VS Code
-
-.vscode/
-
-# OS files
-
-.DS_Store
-Thumbs.db
+# Alembic (optional)
+alembic/versions/*.pyc
 
 # Logs
-
 *.log
 
-# SQLite (if ever used)
+# OS files
+.DS_Store
 
+# IDE
+.vscode/
+.idea/
+
+# Database (if local)
 *.sqlite3
-
-# Alembic (keep versions, ignore cache)
-
-alembic/**pycache**/
-alembic/versions/**pycache**/
-
-# Migrations (optional: only ignore if you DON'T want to track them)
-
-# alembic/versions/
-
-# Testing
-
-.coverage
-htmlcov/
-
-# Pytest
-
-.pytest_cache/
-
-# MyPy
-
-.mypy_cache/
-
-# Ruff / lint
-
-.ruff_cache/
-
-# Build
-
-dist/
-build/
-*.egg-info/
-
-# Temporary files
-
-*.swp
-*.swo
-
-# Secrets / keys
-
-*.pem
-*.key
