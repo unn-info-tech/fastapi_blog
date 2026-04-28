@@ -33,7 +33,7 @@ jobs:
           ALLOWED_ORIGINS: http://localhost:3000
           ENVIRONMENT: testing
         run: |
-          pytest --cov=app --cov-report=xml
+          pytest 
 
       - name: Coverage hisobotini yuklash
         uses: codecov/codecov-action@v3
