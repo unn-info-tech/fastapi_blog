@@ -26,6 +26,7 @@ jobs:
 
       - name: Testlarni ishga tushirish
         env:
+          PYTHONPATH: .
           DATABASE_URL: sqlite://
           SECRET_KEY: test-secret-key-12345
           ALGORITHM: HS256
@@ -33,7 +34,7 @@ jobs:
           ALLOWED_ORIGINS: http://localhost:3000
           ENVIRONMENT: testing
         run: |
-          pytest 
+          pytest --cov=app --cov-report=xml
 
       - name: Coverage hisobotini yuklash
         uses: codecov/codecov-action@v3
