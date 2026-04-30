@@ -9,13 +9,21 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000"
     environment: str = "development"   # ← YANGI
     debug: bool = True                 # ← YANGI
+    
+
+    # Email (ixtiyoriy)
+    mail_username: str = ""
+    mail_password: str = ""
+    mail_from: str = ""
+    mail_port: int = 587
+    mail_server: str = "smtp.gmail.com"
 
     @property
-    def origins_list(self) -> List[str]:
+    def origins_list(self):
         return [o.strip() for o in self.allowed_origins.split(",")]
 
     @property
-    def is_production(self) -> bool:
+    def is_production(self):
         return self.environment == "production"
 
     class Config:

@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from ..utils.email import send_post_notification
+
 
 from .. import models, schemas, oauth2
 from ..database import get_db
@@ -11,6 +13,7 @@ router = APIRouter(
 )
 
 # ─── CREATE (login kerak) ──────────────────────
+
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
@@ -18,17 +21,25 @@ router = APIRouter(
 )
 def create_post(
     post: schemas.PostCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
-    # ↑ Token tekshiriladi, user olinadi
 ):
     new_post = models.Post(
-        owner_id=current_user.id,   # Kim yaratdi
-        **post.model_dump()
+        owner_id=current_user.id,
+        **post.dict()
     )
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+
+    # Fonda post bildirishi
+    background_tasks.add_task(
+        send_post_notification,
+        author_email=current_user.email,
+        title=new_post.title
+    )
+
     return new_post
 
 # ─── READ ALL (login shart emas) ──────────────

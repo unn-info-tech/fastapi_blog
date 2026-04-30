@@ -4,24 +4,35 @@ from typing import List, Optional
 from .. import models, schemas
 from ..database import get_db
 from ..utils.hashing import hash_password
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from sqlalchemy.orm import Session
+
+from .. import models, schemas
+from ..database import get_db
+from ..utils.hashing import hash_password
+from ..utils.email import send_welcome_email, write_log
 
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
 
-# ─── CREATE USER ──────────────────────────────
+
+# ─── CREATE USER (background email) ──────────
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.UserResponse
 )
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    # Email allaqachon borligini tekshirish
+def create_user(
+    user: schemas.UserCreate,
+    background_tasks: BackgroundTasks,   # ← BackgroundTasks
+    db: Session = Depends(get_db)
+):
+    # Email tekshirish
     existing = db.query(models.User).filter(
         models.User.email == user.email
     ).first()
-
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -32,11 +43,28 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     hashed = hash_password(user.password)
     user.password = hashed
 
-    new_user = models.User(**user.model_dump())
+    # DB ga yozish
+    new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    # Fonda email yuborish — foydalanuvchi kutmaydi!
+    background_tasks.add_task(
+        send_welcome_email,
+        email=new_user.email,
+        username=new_user.username
+    )
+
+    # Fonda log yozish
+    background_tasks.add_task(
+        write_log,
+        action="user_created",
+        user_id=new_user.id,
+        details=f"email={new_user.email}"
+    )
+
+    # Darhol javob! (email kutilmaydi)
     return new_user
 
 # ─── GET USER ─────────────────────────────────

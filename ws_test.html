@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; }
+        #messages { border: 1px solid #ccc; height: 300px;
+                    overflow-y: auto; padding: 10px; margin-bottom: 10px; }
+        input { width: 70%; padding: 8px; }
+        button { padding: 8px 16px; margin-left: 5px; }
+        .sent     { color: blue; }
+        .received { color: green; }
+        .system   { color: gray; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h2>WebSocket Test</h2>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Xabar yozing..."/>
+    <button onclick="sendMessage()">Yuborish</button>
+    <button onclick="disconnect()" style="background:red; color:white">
+        Uzilish
+    </button>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8000/ws");
+        const messages = document.getElementById("messages");
+        const input = document.getElementById("messageInput");
+
+        function addMessage(text, type) {
+            const div = document.createElement("div");
+            div.className = type;
+            div.textContent = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        ws.onopen = () => {
+            addMessage("✅ Server ga ulandi!", "system");
+        };
+
+        ws.onmessage = (event) => {
+            addMessage("Server: " + event.data, "received");
+        };
+
+        ws.onclose = () => {
+            addMessage("❌ Ulanish yopildi", "system");
+        };
+
+        ws.onerror = (error) => {
+            addMessage("Xato: " + error, "system");
+        };
+
+        function sendMessage() {
+            const message = input.value.trim();
+            if (message && ws.readyState === WebSocket.OPEN) {
+                addMessage("Siz: " + message, "sent");
+                ws.send(message);
+                input.value = "";
+            }
+        }
+
+        function disconnect() {
+            ws.close();
+        }
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
