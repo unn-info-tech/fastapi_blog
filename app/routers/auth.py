@@ -1,6 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from httpx import request
+
+
+from app.middleware.rate_limit import rate_limit_middleware
+from app.middleware.rate_limit import rate_limit_middleware
 from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from ..middleware.rate_limit import rate_limit_middleware
 
 from .. import models, schemas
 from ..database import get_db
@@ -12,10 +19,14 @@ router = APIRouter(
 )
 
 @router.post("/login", response_model=schemas.Token)
-def login(
+async def login(
+    request: Request,
     user_credentials: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+    # Login ga qattiq cheklash: 5 ta/daqiqa
+    await rate_limit_middleware(request, calls=5, period=60)
+    
     # 1. Foydalanuvchini topish
     user = db.query(models.User).filter(
         models.User.email == user_credentials.username

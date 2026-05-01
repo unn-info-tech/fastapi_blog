@@ -21,3 +21,5 @@ alembic/versions/*.pyc
 
 # Database (if local)
 *.sqlite3
+
+uploads/

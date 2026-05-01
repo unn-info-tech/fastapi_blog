@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     mail_port: int = 587
     mail_server: str = "smtp.gmail.com"
 
+    redis_url: str = "redis://localhost:6379"
+    cache_ttl: int = 300    # 5 daqiqa (sekund)
+
     @property
     def origins_list(self):
         return [o.strip() for o in self.allowed_origins.split(",")]
